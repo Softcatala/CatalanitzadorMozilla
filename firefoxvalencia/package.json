@@ -1,0 +1,10 @@
+{
+    "name": "firefoxvalencia", 
+    "license": "MPL 1.1/GPL 2.0/LGPL 2.1",
+    "fullName": "Valencianitzador per a Mozilla", 
+    "author": "Softvalencià",
+    "homepage" : "http://www.softvalencia.org/guies/firefox-en-valencia/",
+    "version": "0.2", 
+    "id": "firefoxvalencia@softvalencia.org", 
+    "description": "Extensió per a facilitar tindre les aplicacions de Mozilla en valencià"
+}

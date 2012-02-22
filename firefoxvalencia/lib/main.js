@@ -24,14 +24,6 @@ var widget = widgets.Widget({
   }
 });
 
-var dictPanel = require("panel").Panel({
-  width:215,
-  height:160,
-  contentURL: localdata.url("dictinstall.html"),
-  contentScriptFile: [localdata.url("jquery-1.4.4.min.js"),
-                      localdata.url("dictinstall.js")]
-});
-
 
 // Check on every Firefox start
 detchanlang(false);
@@ -245,7 +237,6 @@ function detchanlang(clicktrigger) {
 	      iconURL: iconpopup
 	});
 	
-	dictPanel.show();
 	downFirefox(defaultlang, uilang);     
       }
       

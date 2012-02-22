@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <RDF:Description about="urn:mozilla:extension:preferredlanguage@softcatala.cat">
+    <em:updates>
+      <RDF:Seq>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.7</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0</em:minVersion>
+                <em:maxVersion>16.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/navegaencatala-0.7.xpi</em:updateLink>
+                <em:updateHash>sha1:d2bd39371c8613e5803c4f393db88407c02116d3</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.6</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0</em:minVersion>
+                <em:maxVersion>16.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/navegaencatala-0.6.xpi</em:updateLink>
+                <em:updateHash>sha1:19d7fbf8b1b04bbe889f3da535b40e6fde32d2ee</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.3</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>3.0</em:minVersion>
+                <em:maxVersion>3.7.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/navegaencatala-0.3.xpi</em:updateLink>
+                <em:updateHash>sha1:d80ae2c87a43145006fc1aeb1f2d2bf98d7c49d6</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+      </RDF:Seq>
+    </em:updates>
+  </RDF:Description>
+</RDF:RDF>
+

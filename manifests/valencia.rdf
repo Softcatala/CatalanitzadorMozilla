@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <RDF:Description about="urn:mozilla:extension:firefoxvalencia@softvalencia.org">
+    <em:updates>
+      <RDF:Seq>
+
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.1.1</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0</em:minVersion>
+                <em:maxVersion>16.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/valencia/mozillavalencia-0.1.1.xpi</em:updateLink>
+                <em:updateHash>sha1:664f6b96144e255ac5383abffd3919de269d774b</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+      </RDF:Seq>
+    </em:updates>
+  </RDF:Description>
+</RDF:RDF>
+

@@ -444,8 +444,3 @@ function getLangpack(version, os, app, channel) {
 
 }
 
-function getDictionary(version, os, app, channel) {
-
-
-}
-

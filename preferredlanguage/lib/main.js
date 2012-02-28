@@ -431,7 +431,7 @@ function getLangpack(version, os, app, channel) {
 			version = version+'b1'; //Take the first beta version
 		}
 
-		var langpackurl = "ftp://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
+		var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
 	
         	var tabs = require("tabs");
 

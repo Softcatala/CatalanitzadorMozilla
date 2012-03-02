@@ -1,7 +1,7 @@
 const {Cc, Ci, Cr, Cu} = require("chrome");
 
 const FIREFOX_ID = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
-const THUNDERBIRD_ID = "{3550f703-e582-4d05-9a08-453d09bdfdc6}";
+// const THUNDERBIRD_ID = "{3550f703-e582-4d05-9a08-453d09bdfdc6}"; Not possible now
 
 const widgets = require("widget");
 const localdata = require("self").data
@@ -10,8 +10,9 @@ const prefsBundle = require("preferences-service");
 const StringBundle = require("app-strings").StringBundle;
 
 const defaultlang = "ca";
+const defaultlangstr = "ca, en-US, en";
 
-// Create main widget
+// Create icon for the toolbar
 var widget = widgets.Widget({
   id: "navega-link",
   label: "Navega en català",
@@ -30,49 +31,51 @@ exports.onUnload = function (reason) {
   
   if (reason == 'uninstall' || reason == 'disable') {
 
-  var prev_locale;
-  var prev_accept;
-  var prev_match;
+    var prev_locale;
+    var prev_accept;
+    var prev_match;
 
-  prev_locale = prefsBundle.get("extensions.softcatala.localeprev", "ca");
-  prev_accept = prefsBundle.get("extensions.softcatala.acceptprev", "ca, en-US, en");
-  prev_match = prefsBundle.get("extensions.softcatala.matchprev", "false");
+    // Get former values
+    prev_locale = prefsBundle.get("extensions.softcatala.localeprev", defaultlang);
+    prev_accept = prefsBundle.get("extensions.softcatala.acceptprev", defaultlangstr);
+    prev_match = prefsBundle.get("extensions.softcatala.matchprev", "false");
 
-  prefsBundle.set("general.useragent.locale", prev_locale);
-  prefsBundle.set("intl.accept_languages", prev_accept);
-  prefsBundle.set("intl.locale.matchOS", prev_match);
+    // Recover former values
+    prefsBundle.set("general.useragent.locale", prev_locale);
+    prefsBundle.set("intl.accept_languages", prev_accept);
+    prefsBundle.set("intl.locale.matchOS", prev_match);
   
-  prefsBundle.set("extensions.softcatala.localeprev", "");
-  prefsBundle.set("extensions.softcatala.acceptprev", "");
-  prefsBundle.set("extensions.softcatala.matchprev", false);
-  prefsBundle.set("extensions.softcatala.first", 0);
+    // Empty old storage
+    prefsBundle.set("extensions.softcatala.localeprev", "");
+    prefsBundle.set("extensions.softcatala.acceptprev", "");
+    prefsBundle.set("extensions.softcatala.matchprev", false);
+    prefsBundle.set("extensions.softcatala.first", 0);
   
-  }  
+    }  
 
 };
-
 
 function detchanlang(clicktrigger) {
 
   var notifications = require("notifications");
   var iconpopup = localdata.url("icon32.png");
   
-    //Check if locale, trigger for ca version
-  var uilang = prefsBundle.get("general.useragent.locale", "ca");
+  // Check if locale, default assume default lang
+  var uilang = prefsBundle.get("general.useragent.locale", defaultlang);
 
   // Get user interface language
   if (uilang == "chrome://global/locale/intl.properties") {
-      var bundle = StringBundle(uilang);
-      uilang = bundle.get("general.useragent.locale");
+    var bundle = StringBundle(uilang);
+    uilang = bundle.get("general.useragent.locale");
   }
   
   // Get accept languages
-  var preflangs = prefsBundle.get("intl.accept_languages", "ca, en-US, en");
+  var preflangs = prefsBundle.get("intl.accept_languages", defaultlangstr);
 
+  // Extract lang codes
   var listlangs;
   
   if (preflangs == 'chrome://global/locale/intl.properties') {
-  
     var bundle = StringBundle(preflangs);
     var langs = "undef";
     langs = bundle.get("intl.accept_languages");
@@ -85,58 +88,54 @@ function detchanlang(clicktrigger) {
 
   //Trim array
   for(j=0;j<listlangs.length;j++) {
-	listlangs[j] = trim(listlangs[j]);
+    listlangs[j] = trim(listlangs[j]);
   }
   
   //OS match
   var osmatch = prefsBundle.get("intl.locale.matchOS", false);
-
-  // Fist time
   
   //Create extensions branch if it doesn't exist, store previous
 
-  //First run
+  //Set First run -> 0 
   if (!prefsBundle.has('extensions.softcatala.first')) {
-	prefsBundle.set("extensions.softcatala.first", 0);	
+    prefsBundle.set("extensions.softcatala.first", 0);	
   }  
 
   //Locale interface
   if (!prefsBundle.has('extensions.softcatala.localeprev')) {
-	prefsBundle.set("extensions.softcatala.localeprev", uilang);
+    prefsBundle.set("extensions.softcatala.localeprev", uilang);
   }
   else {
-	if (prefsBundle.get('extensions.softcatala.localeprev') == '') {
-		prefsBundle.set("extensions.softcatala.localeprev", uilang);
-        }
+    if (prefsBundle.get('extensions.softcatala.localeprev') == '') {
+      prefsBundle.set("extensions.softcatala.localeprev", uilang);
+    }
   }
   
   //Accept language
   listlangstr = listlangs.join(",");
   if (!prefsBundle.has('extensions.softcatala.acceptprev')) {
-  	prefsBundle.set("extensions.softcatala.acceptprev", listlangstr);
+    prefsBundle.set("extensions.softcatala.acceptprev", listlangstr);
   }
   else {
-	if (prefsBundle.get('extensions.softcatala.acceptprev') == '') {
-		prefsBundle.set("extensions.softcatala.acceptprev", listlangstr);
-        }
+    if (prefsBundle.get('extensions.softcatala.acceptprev') == '') {
+      prefsBundle.set("extensions.softcatala.acceptprev", listlangstr);
+    }
   }
 
   //MatchOS
   if (!prefsBundle.has('extensions.softcatala.matchprev')) {
-  	prefsBundle.set("extensions.softcatala.matchprev", osmatch);
+    prefsBundle.set("extensions.softcatala.matchprev", osmatch);
   }
 
+  // Uses regexp for ensuring lang code
+  var lngRegexp = new RegExp("^"+defaultlang,"gi");
 
-  //Start playing
-  
-  var tempRegexp = new RegExp("^"+defaultlang,"g");
-
-
-  // Check if download
+  // Register if langpack is downloaded
   var performed = false;
 
   // Made it enabled - Not used for now
   var enabled = true;
+  
   if (enabled) {
   
     var insdef = 0;
@@ -149,7 +148,7 @@ function detchanlang(clicktrigger) {
       if (clist == 0) {
 	
 	// If first entry is already default lang -> Done    
-	if (tempRegexp.test(listlangs[clist])) {
+	if (lngRegexp.test(listlangs[clist])) {
 	  insdef++;
 	  break;
 	}
@@ -159,40 +158,35 @@ function detchanlang(clicktrigger) {
       else {
 	
 	// If default lang is somewhere
-	if (tempRegexp.test(listlangs[clist])) {
-  
-	  // Most cases [ca]
-	  if (listlangs[clist] == defaultlang) {
-	    insdef++;
-  
-	    listlangs.splice(clist, 1);
-	    listlangs.unshift(defaultlang);
-	    newlistlangs = listlangs.join(',');
-	    prefsBundle.set("intl.accept_languages", newlistlangs);
-	    notifications.notify({
-	      text: "A partir d'ara ja navegueu en català",
-	      iconURL: iconpopup
-	    });
-	    performed = downFirefox(defaultlang, uilang);
-	    break;
-	  }
+	if (lngRegexp.test(listlangs[clist])) {
 	  
-	  // Other cases [ca-valencia], [ca-ES], etc.
-	  else {
-	    insdef++;
+	  // Mark detected
+	  insdef++;
+
+	  // Default change is defaultang [ca]
+	  var lngchg = defaultlang;
   
-	    var defaultextra = listlangs[clist];
-	    listlangs.splice(clist, 1);
-	    listlangs.unshift(defaultextra);
-	    newlistlangs = listlangs.join(',');
-	    prefsBundle.set("intl.accept_languages", newlistlangs);
-	    notifications.notify({
-	      text: "A partir d'ara ja navegueu en català",
-	      iconURL: iconpopup
-	    });
-	    performed = downFirefox(defaultlang, uilang);
-	    break;
+	  // Other cases [ca-valencia], [ca-ES], etc.
+	  if (listlangs[clist] != defaultlang) {
+	    lngchg = listlangs[clist];
 	  }
+  
+	  listlangs.splice(clist, 1);
+	  listlangs.unshift(lngchg);
+	    
+	  // Create new array
+	  newlistlangs = listlangs.join(',');
+	  prefsBundle.set("intl.accept_languages", newlistlangs);
+	    
+	    
+	  notifications.notify({
+	    text: "A partir d'ara ja navegueu en català",
+	    iconURL: iconpopup
+	  });
+	    
+	  performed = downFirefox(defaultlang, uilang);
+	  break;
+	
 	}
       }
     }
@@ -201,7 +195,9 @@ function detchanlang(clicktrigger) {
     if (insdef == 0) {
       listlangs.unshift(defaultlang);
       newlistlangs = listlangs.join(',');
+      
       prefsBundle.set("intl.accept_languages", newlistlangs);
+      
       notifications.notify({
 	      text: "A partir d'ara ja navegueu en català",
 	      iconURL: iconpopup
@@ -215,56 +211,57 @@ function detchanlang(clicktrigger) {
       if (clicktrigger) {
 	
 	notifications.notify({
-	      text: "Enhorabona! Ja navegàveu en català",
-	      iconURL: iconpopup
+	  text: "Enhorabona! Ja navegàveu en català",
+	  iconURL: iconpopup
 	});
 	
 	performed = downFirefox(defaultlang, uilang);     
       }
 
-        // Last performed check - First time
-  	if (prefsBundle.get("extensions.softcatala.first") < 2) {
-		performed = false;
-  	} 	
+      // Last performed check - First time
+      if (prefsBundle.get("extensions.softcatala.first") < 2) {
+	  performed = false;
+      } 	
      
     }
     
   }
  
-
   // Periodical checking
   if (!performed) {
 
-	  // List locales in the system
- 	 var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
+    var existlocale = false;
+
+    var lngRegexp = new RegExp("^"+defaultlang,"g");
+    
+    // List enabled locales in the system
+    var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
 	    .getService(Components.interfaces.nsIToolkitChromeRegistry);
+	    
+    var locales = cr.getLocalesForPackage("global");
+    
+    while (locales.hasMore()) {
+     	var locale = locales.getNext();
+     	if (lngRegexp.test(locale)) { existlocale = true; }
+    }
 
-	  var locales = cr.getLocalesForPackage("global");
-	  var existlocale = false;
+    if (!existlocale) {
 
-  	  var tempRegexp = new RegExp("^"+defaultlang,"g");
+      notifications.notify({
+      text: "Es prova d'activar la interfície en català...",
+      iconURL: iconpopup
+      });
 
-	   while (locales.hasMore()) {
-     		var locale = locales.getNext();
-     		if (tempRegexp.test(locale)) { existlocale = true; }
-   	   }
+      downFirefox(defaultlang, uilang);
+    }
 
-	if (!existlocale) {
-
-		notifications.notify({
-	    	text: "Es prova d'activar la interfície en català...",
-	      	iconURL: iconpopup
-		});
-
-		downFirefox(defaultlang, uilang);
-	}
-
-	else {
-		// Last performed check - First time
-  		if (prefsBundle.get("extensions.softcatala.first") < 2) {
-			downFirefox(defaultlang, uilang);
-  		} 	
-	}
+    else {
+      
+      // Last performed check - First time
+      if (prefsBundle.get("extensions.softcatala.first") < 2) {
+	downFirefox(defaultlang, uilang);
+      } 	
+    }
 
   }
 
@@ -274,7 +271,7 @@ function detchanlang(clicktrigger) {
 
 function downFirefox(defaultlang, uilang) {
   
-  var tempRegexp = new RegExp("^"+defaultlang,"g");
+  var lngRegexp = new RegExp("^"+defaultlang,"g");
   var extRegexp = new RegExp("langpack-"+defaultlang); //Detect langpack
   var dicRegexp = new RegExp(defaultlang+"@dictionaries"); //Detect dictionary
 
@@ -287,6 +284,11 @@ function downFirefox(defaultlang, uilang) {
 
   var info = Cc["@mozilla.org/xre/app-info;1"]
            .getService(Components.interfaces.nsIXULAppInfo);
+	   
+  // Get ready for notifications
+  var notifications = require("notifications");
+  var iconpopup = localdata.url("icon32.png");	   
+	   
   // Get the name of the application running us
   
   var version = info.version; 
@@ -314,133 +316,127 @@ function downFirefox(defaultlang, uilang) {
 
    while (locales.hasMore()) {
      var locale = locales.getNext();
-     if (tempRegexp.test(locale)) { existlocale = true; }
+     if (lngRegexp.test(locale)) { existlocale = true; }
    }
    
-   // Case locale already exists -> base version or Linux system
-   if (existlocale) {
+  // Case locale already exists -> base version or Linux system
+  if (existlocale) {
 
-	var tempRegexp = new RegExp("^"+defaultlang,"g");
-	var uitest = new Boolean();
-	uitest = false;
-	uitest = tempRegexp.test(uilang);
+    var lngRegexp = new RegExp("^"+defaultlang,"g");
+    var uitest = new Boolean();
+    uitest = false;
+    uitest = lngRegexp.test(uilang);
 
-	if (uitest) {
-		//Cas de distros com Ubuntu
-  	 	if (osmatch) {
-        		prefsBundle.set("intl.locale.matchOS", false);
-  	 	}
+    if (uitest) {
+      
+      // If UI locales is forced by the OS (e.g. Linux distros)
+      if (osmatch) {
+        prefsBundle.set("intl.locale.matchOS", false);
+      }
 
-		if (prefsBundle.get("extensions.softcatala.first") == 1) {
+      if (prefsBundle.get("extensions.softcatala.first") == 1) {
 
-        		var tabs = require("tabs");
-			var urlff = "http://www.firefox.cat?catalanitzador=1";
+	var tabs = require("tabs");
+	var urlff = "http://www.firefox.cat?catalanitzador=1";
 
-			if (os == 'win32') {
-				urlff = urlff + "&win=1";
-			}
-
-			if (!dicRegexp.test(enabledext)) {
-
-				urlff = urlff + "&dic=1";
-			}
-
-			tabs.open(urlff);
-
-			var notifications = require("notifications");
-  			var iconpopup = localdata.url("icon32.png");
-
-			notifications.notify({
-	      			text: "Esteu navegant en català! Descobriu què més podeu fer.",
-	      			iconURL: iconpopup
-	 		});
-
-			prefsBundle.set("extensions.softcatala.first", 2);
-		}
-
+	if (os == 'win32') {
+	  urlff = urlff + "&win=1";
 	}
-	else {
-        	//Cas de distros com Ubuntu
-  	 	if (osmatch) {
-        		prefsBundle.set("intl.locale.matchOS", false);
-  	 	}
 
-		prefsBundle.set("general.useragent.locale", defaultlang);
-		var notifications = require("notifications");
-  		var iconpopup = localdata.url("icon32.png");
-
-		notifications.notify({
-	      		text: "Cal que reinicieu el Firefox perquè els canvis tinguin efecte.",
-	      		iconURL: iconpopup
-	 	});
-
+	if (!dicRegexp.test(enabledext)) {
+	  urlff = urlff + "&dic=1";
 	}
-	 
-   }
 
-   else {
+	tabs.open(urlff);
 
-     if (!extRegexp.test(enabledext)) {
-	
-	  if (!tempRegexp.test(uilang)) {
+	notifications.notify({
+	  text: "Esteu navegant en català! Descobriu què més podeu fer.",
+	  iconURL: iconpopup
+	});
 
-		prefsBundle.set("general.useragent.locale", defaultlang);
-  	  }	
+	prefsBundle.set("extensions.softcatala.first", 2);
+      }
 
-          //Cas de distros com Ubuntu
-  	  if (osmatch) {
-        		prefsBundle.set("intl.locale.matchOS", false);
-  	  }
+    }
+    else {
+      //Cas de distros com Ubuntu
+      if (osmatch) {
+        prefsBundle.set("intl.locale.matchOS", false);
+      }
 
-  	  getLangpack(version, os, "firefox", channel);
-	  //After this, we suppose that is enabled
-	  prefsBundle.set("extensions.softcatala.first", 1);
-     }
+      prefsBundle.set("general.useragent.locale", defaultlang);
 
+      notifications.notify({
+	text: "Cal que reinicieu el Firefox perquè els canvis tinguin efecte.",
+	iconURL: iconpopup
+      });
+
+    } 
   }
 
+  else {
+
+    if (!extRegexp.test(enabledext)) {
+	
+      if (!lngRegexp.test(uilang)) {
+	prefsBundle.set("general.useragent.locale", defaultlang);
+      }	
+
+      //Cas de distros com Ubuntu
+      if (osmatch) {
+        prefsBundle.set("intl.locale.matchOS", false);
+      }
+
+      getLangpack(version, os, "firefox", channel);
+      
+      //After this, we suppose thatlangpack is enabled
+      prefsBundle.set("extensions.softcatala.first", 1);
+    }
+
+  }
+  
   return(true);
+  
 }
-
-function trim(stringToTrim) {
-	return stringToTrim.replace(/^\s+|\s+$/g,"");
-}
-
-function simplifyVersion(version) {
-
-        var splitted = version.split(".");
-        version = splitted[0]+"."+splitted[1];
-        return(version);
-}
-
 
 function getLangpack(version, os, app, channel) {
 
-  	var notifications = require("notifications");
-  	var iconpopup = localdata.url("icon32.png");
+  var notifications = require("notifications");
+  var iconpopup = localdata.url("icon32.png");
+  var tabs = require("tabs");
 
-	if (channel == 'nightly' || channel == 'aurora') {
-	      notifications.notify({
-	      text: "No es pot instal·lar un paquet d'idioma en les versions de desenvolupament",
-	      iconURL: iconpopup
-	    });
-	}
+  // Warn is not available for aurora or nightly
+  if (channel == 'nightly' || channel == 'aurora') {
+	notifications.notify({
+	text: "No es pot instal·lar un paquet d'idioma en les versions de desenvolupament",
+	iconURL: iconpopup
+      });
+  }
 
-	else {
-		if (channel == 'beta') {
-			version = version+'b1'; //Take the first beta version
-		}
+  else {
+    if (channel == 'beta') {
+      version = version+'b1'; //Take the first beta version
+    }
 
-		var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
-	
-        	var tabs = require("tabs");
+    var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
+  
 
-		tabs.open({
-  			url: langpackurl,
-  			inBackground: true
-		});
+    tabs.open({
+      url: langpackurl,
+      inBackground: true
+    });
+    
+  }
 
-	}
+}
 
+function trim(stringToTrim) {
+  return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+
+function simplifyVersion(version) {
+  var splitted = version.split(".");
+  version = splitted[0]+"."+splitted[1];
+  return(version);
 }
 

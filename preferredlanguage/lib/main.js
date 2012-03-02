@@ -11,6 +11,7 @@ const StringBundle = require("app-strings").StringBundle;
 
 const defaultlang = "ca";
 const defaultlangstr = "ca, en-US, en";
+const defaultmatchOS = false;
 
 // Create icon for the toolbar
 var widget = widgets.Widget({
@@ -38,7 +39,7 @@ exports.onUnload = function (reason) {
     // Get former values
     prev_locale = prefsBundle.get("extensions.softcatala.localeprev", defaultlang);
     prev_accept = prefsBundle.get("extensions.softcatala.acceptprev", defaultlangstr);
-    prev_match = prefsBundle.get("extensions.softcatala.matchprev", "false");
+    prev_match = prefsBundle.get("extensions.softcatala.matchprev", defaultmatchOS);
 
     // Recover former values
     prefsBundle.set("general.useragent.locale", prev_locale);
@@ -92,7 +93,7 @@ function detchanlang(clicktrigger) {
   }
   
   //OS match
-  var osmatch = prefsBundle.get("intl.locale.matchOS", false);
+  var osmatch = prefsBundle.get("intl.locale.matchOS", defaultmatchOS);
   
   //Create extensions branch if it doesn't exist, store previous
 
@@ -128,7 +129,7 @@ function detchanlang(clicktrigger) {
   }
 
   // Uses regexp for ensuring lang code
-  var lngRegexp = new RegExp("^"+defaultlang,"gi");
+  var lngRegexp = new RegExp("^"+defaultlang,"g");
 
   // Register if langpack is downloaded
   var performed = false;
@@ -229,21 +230,10 @@ function detchanlang(clicktrigger) {
  
   // Periodical checking
   if (!performed) {
-
-    var existlocale = false;
-
+    
     var lngRegexp = new RegExp("^"+defaultlang,"g");
-    
-    // List enabled locales in the system
-    var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
-	    .getService(Components.interfaces.nsIToolkitChromeRegistry);
-	    
-    var locales = cr.getLocalesForPackage("global");
-    
-    while (locales.hasMore()) {
-     	var locale = locales.getNext();
-     	if (lngRegexp.test(locale)) { existlocale = true; }
-    }
+    var existlocale = new Boolean(false);
+    existlocale = detectLocale(lngRegexp);
 
     if (!existlocale) {
 
@@ -271,33 +261,33 @@ function detchanlang(clicktrigger) {
 
 function downFirefox(defaultlang, uilang) {
   
+  // Get ready for notifications
+  var notifications = require("notifications");
+  var iconpopup = localdata.url("icon32.png");
+  
+  // Detect regexps
   var lngRegexp = new RegExp("^"+defaultlang,"g");
   var extRegexp = new RegExp("langpack-"+defaultlang); //Detect langpack
   var dicRegexp = new RegExp(defaultlang+"@dictionaries"); //Detect dictionary
 
-  var osmatch = prefsBundle.get("intl.locale.matchOS", false);
+  var osmatch = prefsBundle.get("intl.locale.matchOS", defaultmatchOS);
   var locale = prefsBundle.get("general.useragent.locale", defaultlang);
   var enabledext = prefsBundle.get("extensions.enabledAddons", "");
   var localeprev = prefsBundle.get("extensions.softcatala.localeprev", defaultlang);
 
+  // Firefox channel
   var channel = prefsBundle.get("app.update.channel");
 
   var info = Cc["@mozilla.org/xre/app-info;1"]
-           .getService(Components.interfaces.nsIXULAppInfo);
-	   
-  // Get ready for notifications
-  var notifications = require("notifications");
-  var iconpopup = localdata.url("icon32.png");	   
-	   
-  // Get the name of the application running us
-  
+           .getService(Components.interfaces.nsIXULAppInfo);  
+	     
   var version = info.version; 
   //version = simplifyVersion(version); -> For Mozilla Langpacks not
   
   var osString = Cc["@mozilla.org/xre/app-info;1"]  
                .getService(Components.interfaces.nsIXULRuntime).OS; 
 
-  //Default string
+  //Default string for OS
   var os = "win32";
   if (osString == "Linux") {
   	os = "linux-i686";
@@ -305,35 +295,25 @@ function downFirefox(defaultlang, uilang) {
   if (osString == "Darwin") {
 	os = "mac";
   }
+  
+  // If UI locale is forced by the OS (e.g. Linux distros) -> change it
+  if (osmatch) {
+    prefsBundle.set("intl.locale.matchOS", false);
+  }
 
-  // List locales in the system
-  var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
-    .getService(Components.interfaces.nsIToolkitChromeRegistry);
-
-  var locales = cr.getLocalesForPackage("global");
-  var existlocale = new Boolean();
-  existlocale = false;
-
-   while (locales.hasMore()) {
-     var locale = locales.getNext();
-     if (lngRegexp.test(locale)) { existlocale = true; }
-   }
+  var existlocale = new Boolean(false);
+  existlocale = detectLocale(lngRegexp);
    
   // Case locale already exists -> base version or Linux system
   if (existlocale) {
 
     var lngRegexp = new RegExp("^"+defaultlang,"g");
-    var uitest = new Boolean();
-    uitest = false;
-    uitest = lngRegexp.test(uilang);
+    var uitest = new Boolean(false);
+    var uitest = lngRegexp.test(uilang);
 
     if (uitest) {
-      
-      // If UI locales is forced by the OS (e.g. Linux distros)
-      if (osmatch) {
-        prefsBundle.set("intl.locale.matchOS", false);
-      }
 
+      // After langpack is installed -> Landing page
       if (prefsBundle.get("extensions.softcatala.first") == 1) {
 
 	var tabs = require("tabs");
@@ -356,13 +336,8 @@ function downFirefox(defaultlang, uilang) {
 
 	prefsBundle.set("extensions.softcatala.first", 2);
       }
-
     }
     else {
-      //Cas de distros com Ubuntu
-      if (osmatch) {
-        prefsBundle.set("intl.locale.matchOS", false);
-      }
 
       prefsBundle.set("general.useragent.locale", defaultlang);
 
@@ -370,26 +345,21 @@ function downFirefox(defaultlang, uilang) {
 	text: "Cal que reinicieu el Firefox perquè els canvis tinguin efecte.",
 	iconURL: iconpopup
       });
-
     } 
   }
 
+  // Add langpack
   else {
 
     if (!extRegexp.test(enabledext)) {
 	
       if (!lngRegexp.test(uilang)) {
 	prefsBundle.set("general.useragent.locale", defaultlang);
-      }	
-
-      //Cas de distros com Ubuntu
-      if (osmatch) {
-        prefsBundle.set("intl.locale.matchOS", false);
       }
-
+      
       getLangpack(version, os, "firefox", channel);
       
-      //After this, we suppose thatlangpack is enabled
+      //After this, we suppose that langpack is enabled
       prefsBundle.set("extensions.softcatala.first", 1);
     }
 
@@ -398,6 +368,24 @@ function downFirefox(defaultlang, uilang) {
   return(true);
   
 }
+
+function detectLocale(lngRegexp) {
+  
+  // List locales in the system
+  var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
+    .getService(Components.interfaces.nsIToolkitChromeRegistry);
+
+  var locales = cr.getLocalesForPackage("global");
+  
+  while (locales.hasMore()) {
+    var locale = locales.getNext();
+    if (lngRegexp.test(locale)) { return true; }
+  }
+  
+  return false;
+  
+}
+
 
 function getLangpack(version, os, app, channel) {
 

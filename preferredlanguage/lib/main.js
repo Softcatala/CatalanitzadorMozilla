@@ -134,99 +134,93 @@ function detchanlang(clicktrigger) {
   // Register if langpack is downloaded
   var performed = false;
 
-  // Made it enabled - Not used for now
-  var enabled = true;
+  var insdef = 0;
+  var newlistlangs;
   
-  if (enabled) {
-  
-    var insdef = 0;
-    var newlistlangs;
+  // Review Accept language
+  for (clist = 0; clist < listlangs.length; clist++) {
     
-    // Review Accept language
-    for (clist = 0; clist < listlangs.length; clist++) {
+    // Check first entry
+    if (clist == 0) {
       
-      // Check first entry
-      if (clist == 0) {
-	
-	// If first entry is already default lang -> Done    
-	if (lngRegexp.test(listlangs[clist])) {
-	  insdef++;
-	  break;
-	}
-      }
-      
-      // Otherwise
-      else {
-	
-	// If default lang is somewhere
-	if (lngRegexp.test(listlangs[clist])) {
-	  
-	  // Mark detected
-	  insdef++;
-
-	  // Default change is defaultang [ca]
-	  var lngchg = defaultlang;
-  
-	  // Other cases [ca-valencia], [ca-ES], etc.
-	  if (listlangs[clist] != defaultlang) {
-	    lngchg = listlangs[clist];
-	  }
-  
-	  listlangs.splice(clist, 1);
-	  listlangs.unshift(lngchg);
-	    
-	  // Create new array
-	  newlistlangs = listlangs.join(',');
-	  prefsBundle.set("intl.accept_languages", newlistlangs);
-	    
-	    
-	  notifications.notify({
-	    text: "A partir d'ara ja navegueu en català",
-	    iconURL: iconpopup
-	  });
-	    
-	  performed = downFirefox(defaultlang, uilang);
-	  break;
-	
-	}
+      // If first entry is already default lang -> Done    
+      if (lngRegexp.test(listlangs[clist])) {
+	insdef++;
+	break;
       }
     }
-  
-    //If default lang is nowhere, add at the beginning
-    if (insdef == 0) {
-      listlangs.unshift(defaultlang);
-      newlistlangs = listlangs.join(',');
-      
-      prefsBundle.set("intl.accept_languages", newlistlangs);
-      
-      notifications.notify({
-	      text: "A partir d'ara ja navegueu en català",
-	      iconURL: iconpopup
-      });
-      performed = downFirefox(defaultlang, uilang);
-    }
     
+    // Otherwise
     else {
       
-      // If everything Ok, don't do anything, unless it's been clicked
-      if (clicktrigger) {
+      // If default lang is somewhere
+      if (lngRegexp.test(listlangs[clist])) {
 	
+	// Mark detected
+	insdef++;
+
+	// Default change is defaultang [ca]
+	var lngchg = defaultlang;
+
+	// Other cases [ca-valencia], [ca-ES], etc.
+	if (listlangs[clist] != defaultlang) {
+	  lngchg = listlangs[clist];
+	}
+
+	listlangs.splice(clist, 1);
+	listlangs.unshift(lngchg);
+	  
+	// Create new array
+	newlistlangs = listlangs.join(',');
+	prefsBundle.set("intl.accept_languages", newlistlangs);
+	  
+	  
 	notifications.notify({
-	  text: "Enhorabona! Ja navegàveu en català",
+	  text: "A partir d'ara ja navegueu en català",
 	  iconURL: iconpopup
 	});
-	
-	performed = downFirefox(defaultlang, uilang);     
+	  
+	performed = downFirefox(defaultlang, uilang);
+	break;
+      
       }
-
-      // Last performed check - First time
-      if (prefsBundle.get("extensions.softcatala.first") < 2) {
-	  performed = false;
-      } 	
-     
     }
-    
   }
+
+  //If default lang is nowhere, add at the beginning
+  if (insdef == 0) {
+    listlangs.unshift(defaultlang);
+    newlistlangs = listlangs.join(',');
+    
+    prefsBundle.set("intl.accept_languages", newlistlangs);
+    
+    notifications.notify({
+	    text: "A partir d'ara ja navegueu en català",
+	    iconURL: iconpopup
+    });
+    performed = downFirefox(defaultlang, uilang);
+  }
+  
+  else {
+    
+    // If everything Ok, don't do anything, unless it's been clicked
+    if (clicktrigger) {
+      
+      notifications.notify({
+	text: "Enhorabona! Ja navegàveu en català",
+	iconURL: iconpopup
+      });
+      
+      performed = downFirefox(defaultlang, uilang);     
+    }
+
+    // Last performed check - First time
+    if (prefsBundle.get("extensions.softcatala.first") < 2) {
+	performed = false;
+    } 	
+   
+  }
+  
  
   // Periodical checking
   if (!performed) {

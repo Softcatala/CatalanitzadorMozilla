@@ -414,11 +414,29 @@ function getLangpack(version, os, app, channel) {
 
     var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
   
+    // First check if it exists
+    var Request = require("request").Request;
 
-    tabs.open({
+    var testURL = Request({
       url: langpackurl,
-      inBackground: true
+      onComplete: function (response) {
+	
+	if (response.status == 200 || response.status == 301 || response.status == 307) {
+	      tabs.open({
+	      url: langpackurl,
+	      inBackground: true
+	      });
+	}
+	else {
+	    notifications.notify({
+	    text: "No s'ha trobat un paquet d'idioma per a la vostra versió. Potser cal que actualitzeu el Firefox abans?",
+	    iconURL: iconpopup
+	  });
+	}
+      }
     });
+    
+    testURL.get();
     
   }
 

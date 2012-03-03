@@ -180,7 +180,6 @@ function detchanlang(clicktrigger) {
     }
 
     else {
-      
       // Last performed check - First time
       if (prefsBundle.get("extensions.softcatala.first") < 2) {
 	downFirefox(defaultlang, uilang);
@@ -197,6 +196,7 @@ function makeNewListLangs(lngRegexp, listlangs) {
   
   var insdef = 0;
   var newlistlangs;
+  var change = 0;
   
   // Review Accept language
   for (clist = 0; clist < listlangs.length; clist++) {
@@ -208,7 +208,7 @@ function makeNewListLangs(lngRegexp, listlangs) {
       if (lngRegexp.test(listlangs[clist])) {
 	
 	insdef++;
-	return false;
+	break;
       }
     }
     
@@ -235,23 +235,28 @@ function makeNewListLangs(lngRegexp, listlangs) {
 	// Create new array
 	newlistlangs = listlangs.join(',');
 	prefsBundle.set("intl.accept_languages", newlistlangs);
-	  
-	return true;
+	change = 1;
+	break;
+      
       }
     }
   }
-
+  
   //If default lang is nowhere, add at the beginning
   if (insdef == 0) {
     listlangs.unshift(defaultlang);
     newlistlangs = listlangs.join(',');
     
     prefsBundle.set("intl.accept_languages", newlistlangs);
-    
-    return true;
+    change = 1;
   }
   
-  return false;
+  if (change > 0) {
+    return true;
+  }
+  else {
+    return false;
+  }
   
 }
 
@@ -292,11 +297,6 @@ function downFirefox(defaultlang, uilang) {
 	os = "mac";
   }
   
-  // If UI locale is forced by the OS (e.g. Linux distros) -> change it
-  if (osmatch) {
-    prefsBundle.set("intl.locale.matchOS", false);
-  }
-
   var existlocale = new Boolean(false);
   existlocale = detectLocale(lngRegexp);
    
@@ -337,6 +337,11 @@ function downFirefox(defaultlang, uilang) {
 
       prefsBundle.set("general.useragent.locale", defaultlang);
 
+      // If UI locale is forced by the OS (e.g. Linux distros) -> change it
+      if (osmatch) {
+	prefsBundle.set("intl.locale.matchOS", false);
+      }
+
       notifications.notify({
 	text: "Cal que reinicieu el Firefox perquè els canvis tinguin efecte.",
 	iconURL: iconpopup
@@ -351,6 +356,11 @@ function downFirefox(defaultlang, uilang) {
 	
       if (!lngRegexp.test(uilang)) {
 	prefsBundle.set("general.useragent.locale", defaultlang);
+      }
+      
+      // If UI locale is forced by the OS (e.g. Linux distros) -> change it
+      if (osmatch) {
+	prefsBundle.set("intl.locale.matchOS", false);
       }
       
       getLangpack(version, os, "firefox", channel);

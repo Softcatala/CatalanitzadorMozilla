@@ -413,8 +413,13 @@ function detectLocale(lngRegexp) {
 }
 
 function getLangpack(version, os, app, channel) {
-
+  
+  var notifications = require("notifications");
+  var iconpopup = localdata.url("icon32.png");
   var tabs = require("tabs");
+  
+  var found = 0;
+  
   var Request = require("request").Request;
   var appJSON = Request({
 	  url: "http://www.mozilla.cat/firefox-valencia.json",
@@ -424,11 +429,20 @@ function getLangpack(version, os, app, channel) {
 		  for (i=0; i<versionsarray.length; i++) {
 			  if (versionsarray[i].id == version) {
 				  tabs.open({url:versionsarray[i].url, inBackground:true});
+				  found = 1;
 			  }
+		  }
+		  
+		  if (found == 0) {
+		    notifications.notify({
+		      text: "No hi ha cap paquet d'idioma disponible encara per a la vostra versió del Firefox",
+		      iconURL: iconpopup
+		    });
 		  }
 	  }
   });
   appJSON.get();
+  
 }
 
 function trim(stringToTrim) {

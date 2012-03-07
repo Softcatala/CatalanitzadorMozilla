@@ -14,6 +14,8 @@ const secondlang = "ca";
 const defaultlangstr = "ca-valencia, ca, en-US, en";
 const defaultmatchOS = false;
 
+const extbase = "extensions.softvalencia";
+
 // Create icon for the toolbar
 var widget = widgets.Widget({
   id: "navega-link",
@@ -37,18 +39,26 @@ exports.onUnload = function (reason) {
   var prev_accept;
   var prev_match;
 
-  prev_locale = prefsBundle.get("extensions.softvalencia.localeprev", defaultlang);
-  prev_accept = prefsBundle.get("extensions.softvalencia.acceptprev", defaultlangstr);
-  prev_match = prefsBundle.get("extensions.softvalencia.matchprev", defaultmatchOS);
+  prev_locale = prefsBundle.get(extbase+".localeprev", defaultlang);
+  prev_accept = prefsBundle.get(extbase+".acceptprev", defaultlangstr);
+  prev_match = prefsBundle.get(extbase+".matchprev", defaultmatchOS);
 
   prefsBundle.set("general.useragent.locale", prev_locale);
   prefsBundle.set("intl.accept_languages", prev_accept);
   prefsBundle.set("intl.locale.matchOS", prev_match);
   
-  prefsBundle.set("extensions.softvalencia.localeprev", "");
-  prefsBundle.set("extensions.softvalencia.acceptprev", "");
-  prefsBundle.set("extensions.softvalencia.matchprev", false);
-  prefsBundle.set("extensions.softvalencia.first", 0);
+  prefsBundle.set(extbase+".localeprev", "");
+  prefsBundle.set(extbase+".acceptprev", "");
+  prefsBundle.set(extbase+".matchprev", false);
+  prefsBundle.set(extbase+".first", 0);
+
+  var notifications = require("notifications");
+  var iconpopup = localdata.url("icon32.png");
+    
+  notifications.notify({
+    text: "Reinicieu el navegador per tornar a la configuració prèvia al Valencianitzador...",
+    iconURL: iconpopup
+  });
 
   }  
 
@@ -57,6 +67,11 @@ exports.onUnload = function (reason) {
 
 function detchanlang(clicktrigger) {
 
+  var chromelangfile = "chrome://global/locale/intl.properties";
+  
+  // Check if accept values are from translation
+  var chromelistlangstr = new Boolean(false);
+  
   var notifications = require("notifications");
   var iconpopup = localdata.url("icon32.png");
   
@@ -80,6 +95,7 @@ function detchanlang(clicktrigger) {
     var langs = "undef";
     langs = bundle.get("intl.accept_languages");
     listlangs = langs.split(',');
+    chromelistlangstr = true;
   }
   
   else {
@@ -97,34 +113,42 @@ function detchanlang(clicktrigger) {
   //Create extensions branch if it doesn't exist, store previous
 
   //Set First run -> 0 
-  if (!prefsBundle.has('extensions.softvalencia.first')) {
-    prefsBundle.set("extensions.softvalencia.first", 0);	
+  if (!prefsBundle.has(extbase+'.first')) {
+    prefsBundle.set(extbase+".first", 0);	
   }  
 
   //Locale interface
-  if (!prefsBundle.has('extensions.softvalencia.localeprev')) {
-    prefsBundle.set("extensions.softvalencia.localeprev", uilang);
+  if (!prefsBundle.has(extbase+'.localeprev')) {
+    prefsBundle.set(extbase+".localeprev", uilang);
   }
   else {
-    if (prefsBundle.get('extensions.softvalencia.localeprev') == '') {
-      prefsBundle.set("extensions.softvalencia.localeprev", uilang);
+    if (prefsBundle.get(extbase+'.localeprev') == '') {
+      prefsBundle.set(extbase+".localeprev", uilang);
     }
   }
   
   //Accept language
   listlangstr = listlangs.join(",");
-  if (!prefsBundle.has('extensions.softvalencia.acceptprev')) {
-    prefsBundle.set("extensions.softvalencia.acceptprev", listlangstr);
+  if (!prefsBundle.has(extbase+'.acceptprev')) {
+    if (chromelistlangstr) {
+      prefsBundle.set(extbase+".acceptprev", chromelangfile);
+    } else {
+      prefsBundle.set(extbase+".acceptprev", listlangstr);
+    }
   }
   else {
-    if (prefsBundle.get('extensions.softvalencia.acceptprev') == '') {
-      prefsBundle.set("extensions.softvalencia.acceptprev", listlangstr);
+    if (prefsBundle.get(extbase+'.acceptprev') == '') {
+      if (chromelistlangstr) {
+       prefsBundle.set(extbase+".acceptprev", chromelangfile);
+      } else {
+       prefsBundle.set(extbase+".acceptprev", listlangstr);
+      }
     }
   }
 
   //MatchOS
-  if (!prefsBundle.has('extensions.softvalencia.matchprev')) {
-    prefsBundle.set("extensions.softvalencia.matchprev", osmatch);
+  if (!prefsBundle.has(extbase+'.matchprev')) {
+    prefsBundle.set(extbase+".matchprev", osmatch);
   }
 
   // Uses regexp for ensuring lang code
@@ -157,7 +181,7 @@ function detchanlang(clicktrigger) {
     }
     
     // Last performed check - First time
-    if (prefsBundle.get("extensions.softvalencia.first") < 2) {
+    if (prefsBundle.get(extbase+".first") < 2) {
 	performed = false;
     } 
     
@@ -182,7 +206,7 @@ function detchanlang(clicktrigger) {
 
     else {
       // Last performed check - First time
-      if (prefsBundle.get("extensions.softvalencia.first") < 2) {
+      if (prefsBundle.get(extbase+".first") < 2) {
 	downFirefox(defaultlang, uilang);
       } 	
     }
@@ -303,7 +327,7 @@ function downFirefox(defaultlang, uilang) {
   var osmatch = prefsBundle.get("intl.locale.matchOS", defaultmatchOS);
   var locale = prefsBundle.get("general.useragent.locale", defaultlang);
   var enabledext = prefsBundle.get("extensions.enabledAddons", "");
-  var localeprev = prefsBundle.get("extensions.softvalencia.localeprev", defaultlang);
+  var localeprev = prefsBundle.get(extbase+".localeprev", defaultlang);
 
   // Firefox channel
   var channel = prefsBundle.get("app.update.channel");
@@ -339,7 +363,7 @@ function downFirefox(defaultlang, uilang) {
     if (uitest) {
 
       // After langpack is installed -> Landing page
-      if (prefsBundle.get("extensions.softvalencia.first") == 1) {
+      if (prefsBundle.get(extbase+".first") == 1) {
 
 	var tabs = require("tabs");
 	tabs.open("http://www.softvalencia.org/valencianitzador-del-firefox");
@@ -349,7 +373,7 @@ function downFirefox(defaultlang, uilang) {
 	  iconURL: iconpopup
 	});
 
-	prefsBundle.set("extensions.softvalencia.first", 2);
+	prefsBundle.set(extbase+".first", 2);
       }
     }
     else {
@@ -385,7 +409,7 @@ function downFirefox(defaultlang, uilang) {
       getLangpack(version, os, "firefox", channel);
       
       //After this, we suppose that langpack is enabled
-      prefsBundle.set("extensions.softvalencia.first", 1);
+      prefsBundle.set(extbase+".first", 1);
     }
 
   }

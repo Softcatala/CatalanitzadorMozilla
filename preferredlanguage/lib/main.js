@@ -436,8 +436,10 @@ function getLangpack(version, os, app, channel) {
       version = version+'b1'; //Take the first beta version
     }
 
+    // Put another mirror
     var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
-  
+    var langpackurl2 = "http://ftp.belnet.be/mirror/ftp.mozilla.org/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
+
     // First check if it exists
     var Request = require("request").Request;
 
@@ -452,10 +454,26 @@ function getLangpack(version, os, app, channel) {
 	      });
 	}
 	else {
-	    notifications.notify({
-	    text: "No s'ha trobat un paquet d'idioma per a la vostra versió. Potser cal que actualitzeu el Firefox abans?",
-	    iconURL: iconpopup
+	  var testURL2 = Request({
+	    url: langpackurl2,
+	    onComplete: function (response) {  
+	    
+	      if (response.status == 200 || response.status == 301 || response.status == 307) {
+		  tabs.open({
+		    url: langpackurl2,
+		    inBackground: true
+		  });
+	      }
+	      else {
+		notifications.notify({
+		text: "No s'ha trobat un paquet d'idioma per a la vostra versió. Potser cal que actualitzeu el Firefox abans?",
+		iconURL: iconpopup
+		});
+	      }
+	    }
 	  });
+	  
+	  testURL2.get();
 	}
       }
     });

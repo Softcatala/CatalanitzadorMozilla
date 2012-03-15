@@ -9,6 +9,21 @@
 
         <RDF:li>
           <RDF:Description>
+            <em:version>0.2</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0</em:minVersion>
+                <em:maxVersion>16.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/valencia/mozillavalencia-0.2.xpi</em:updateLink>
+                <em:updateHash>sha1:5d3d6ae0bec6a443ba8a4c08eac553c78570eaa5</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+        <RDF:li>
+          <RDF:Description>
             <em:version>0.1.1</em:version>
             <em:targetApplication>
               <RDF:Description>

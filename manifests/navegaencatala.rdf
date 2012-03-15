@@ -6,6 +6,22 @@
   <RDF:Description about="urn:mozilla:extension:preferredlanguage@softcatala.cat">
     <em:updates>
       <RDF:Seq>
+
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.8</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0</em:minVersion>
+                <em:maxVersion>16.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/navegaencatala-0.8.xpi</em:updateLink>
+                <em:updateHash>sha1:56ae184e89d35dcd90be9c59be8fdca46f96b8ff</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
         <RDF:li>
           <RDF:Description>
             <em:version>0.7</em:version>

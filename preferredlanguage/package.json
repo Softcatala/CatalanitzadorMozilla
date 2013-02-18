@@ -1,11 +1,11 @@
 {
     "name": "preferredlanguage", 
     "license": "MPL 1.1/GPL 2.0/LGPL 2.1",
-    "fullName": "Catalanitzador per a Mozilla", 
+    "fullName": "Mozilla en català", 
     "author": "Toni Hermoso Pulido",
     "contributors": ["Softcatalà"],
-    "homepage" : "http://www.mozilla.cat/navega-en-catala",
-    "version": "0.8", 
+    "homepage" : "http://www.mozilla.cat/mozilla-en-catala",
+    "version": "1.0", 
     "id": "preferredlanguage@softcatala.cat", 
     "description": "Extensió per garantir que el Firefox estigui en català"
 }

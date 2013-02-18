@@ -15,11 +15,13 @@ const defaultmatchOS = false;
 
 const extbase = "extensions.softcatala";
 
+var _ = require("sdk/l10n").get;
+
 // Create icon for the toolbar
 var widget = widgets.Widget({
-  id: "navega-link",
-  label: "Navega en català",
-  tooltip: 'Navega en català',
+  id: "activa-link",
+  label: _("activa_label"),
+  tooltip: _("activa_tooltip"),
   contentURL: localdata.url("icon16.png"),
   onClick: function() {
     detchanlang(true);
@@ -58,7 +60,7 @@ exports.onUnload = function (reason) {
     var iconpopup = localdata.url("icon32.png");
   
     notifications.notify({
-      text: "Reinicieu el navegador per tornar a la configuració prèvia al Catalanitzador...",
+      text: _("reset"),
       iconURL: iconpopup
     });
   
@@ -172,7 +174,7 @@ function detchanlang(clicktrigger) {
     if (clicktrigger) {
       
       notifications.notify({
-	text: "Enhorabona! Ja navegàveu en català",
+	text: _("already_browsing"),
 	iconURL: iconpopup
       });
       
@@ -196,7 +198,7 @@ function detchanlang(clicktrigger) {
     if (!existlocale) {
 
       notifications.notify({
-      text: "Es prova d'activar la interfície en català...",
+      text: _("try_enable"),
       iconURL: iconpopup
       });
 
@@ -350,7 +352,7 @@ function downFirefox(defaultlang, uilang) {
 	tabs.open(urlff);
 
 	notifications.notify({
-	  text: "Ara ja navegueu en català!",
+	  text: _("now_browsing"),
 	  iconURL: iconpopup
 	});
 
@@ -367,7 +369,7 @@ function downFirefox(defaultlang, uilang) {
       }
 
       notifications.notify({
-	text: "Cal que reinicieu el Firefox perquè els canvis tinguin efecte.",
+	text: _("ask_restart"),
 	iconURL: iconpopup
       });
     } 
@@ -426,7 +428,7 @@ function getLangpack(version, os, app, channel) {
   // Warn is not available for aurora or nightly
   if (channel == 'nightly' || channel == 'aurora') {
 	notifications.notify({
-	text: "No es pot instal·lar un paquet d'idioma en les versions de desenvolupament",
+	text: _("langpack_cannot"),
 	iconURL: iconpopup
       });
   }
@@ -466,7 +468,7 @@ function getLangpack(version, os, app, channel) {
 	      }
 	      else {
 		notifications.notify({
-		text: "No s'ha trobat un paquet d'idioma per a la vostra versió. Potser cal que actualitzeu el Firefox abans?",
+		text: _("langpack_notfound"),
 		iconURL: iconpopup
 		});
 	      }

@@ -306,13 +306,13 @@ function downFirefox(defaultlang, uilang) {
   var channel = prefsBundle.get("app.update.channel");
 
   var info = Cc["@mozilla.org/xre/app-info;1"]
-           .getService(Components.interfaces.nsIXULAppInfo);  
+           .getService(Ci.nsIXULAppInfo);  
 	     
   var version = info.version; 
   //version = simplifyVersion(version); -> For Mozilla Langpacks not
   
   var osString = Cc["@mozilla.org/xre/app-info;1"]  
-               .getService(Components.interfaces.nsIXULRuntime).OS; 
+               .getService(Ci.nsIXULRuntime).OS; 
 
   //Default string for OS
   var os = "win32";
@@ -341,7 +341,7 @@ function downFirefox(defaultlang, uilang) {
 	var tabs = require("tabs");
 	var urlff = "http://www.firefox.cat?catalanitzador=1";
 
-	if (os == 'win32') {
+	if (os == 'win32' || os == 'mac' ) {
 	  urlff = urlff + "&win=1";
 	}
 
@@ -405,7 +405,7 @@ function detectLocale(lngRegexp) {
   
   // List locales in the system
   var cr = Cc["@mozilla.org/chrome/chrome-registry;1"]
-    .getService(Components.interfaces.nsIToolkitChromeRegistry);
+    .getService(Ci.nsIToolkitChromeRegistry);
 
   var locales = cr.getLocalesForPackage("global");
   
@@ -418,72 +418,72 @@ function detectLocale(lngRegexp) {
   
 }
 
-
 function getLangpack(version, os, app, channel) {
-
+  
   var notifications = require("notifications");
   var iconpopup = localdata.url("icon32.png");
   var tabs = require("tabs");
 
-  // Warn is not available for aurora or nightly
+  // Extensions does not work for aurora or nightly
   if (channel == 'nightly' || channel == 'aurora') {
 	notifications.notify({
 	text: _("langpack_cannot"),
 	iconURL: iconpopup
       });
   }
-
+  
   else {
+  
     if (channel == 'beta') {
       version = version+'b1'; //Take the first beta version
     }
-
-    // Put another mirror
+  
+    // FTP URL
     var langpackurl = "http://ftp.mozilla.org/pub/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
-    var langpackurl2 = "http://ftp.belnet.be/mirror/ftp.mozilla.org/"+app+"/releases/"+version+"/"+os+"/xpi/"+defaultlang+".xpi";    	
-
-    // First check if it exists
+    
     var Request = require("request").Request;
+    
+    var found = 0;
+  
+    var appJSON = Request({
+	    url: "http://www.mozilla.cat/firefox-catala.json",
+	    onComplete: function (response) {
+		    var all = response.json;
+		    var versionsarray = all["versions"];
+		    for (i=0; i<versionsarray.length; i++) {
+			    if (versionsarray[i].id == version) {
+				    tabs.open({url:versionsarray[i].url, inBackground:true});
+				    found = 1;
+			    }
+		    }
+		    
+		    if (found == 0) {
+		      
+		      var testURL = Request({
+			url: langpackurl,
+			onComplete: function (response) {
+			  
+			  if (response.status == 200 || response.status == 301 || response.status == 307) {
+				tabs.open({
+				  url: langpackurl,
+				  inBackground: true
+				});
+			  }
+			  else {
+				  notifications.notify({
+				  text: _("langpack_notfound"),
+				  iconURL: iconpopup
+				  });
+			  }
+			}
+		      });
 
-    var testURL = Request({
-      url: langpackurl,
-      onComplete: function (response) {
-	
-	if (response.status == 200 || response.status == 301 || response.status == 307) {
-	      tabs.open({
-	      url: langpackurl,
-	      inBackground: true
-	      });
-	}
-	else {
-	  var testURL2 = Request({
-	    url: langpackurl2,
-	    onComplete: function (response) {  
-	    
-	      if (response.status == 200 || response.status == 301 || response.status == 307) {
-		  tabs.open({
-		    url: langpackurl2,
-		    inBackground: true
-		  });
-	      }
-	      else {
-		notifications.notify({
-		text: _("langpack_notfound"),
-		iconURL: iconpopup
-		});
-	      }
+		      testURL.get();
+		    }
 	    }
-	  });
-	  
-	  testURL2.get();
-	}
-      }
     });
-    
-    testURL.get();
-    
+    appJSON.get();
   }
-
 }
 
 function trim(stringToTrim) {

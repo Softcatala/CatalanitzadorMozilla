@@ -9,6 +9,21 @@
 
         <RDF:li>
           <RDF:Description>
+            <em:version>1.0</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>19.0</em:minVersion>
+                <em:maxVersion>23.*</em:maxVersion>
+                <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/mozillaencatala-1.0.xpi</em:updateLink>
+                <em:updateHash>sha1:597d6958a343be2ceec167b999a80153376403f4</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+        <RDF:li>
+          <RDF:Description>
             <em:version>0.8</em:version>
             <em:targetApplication>
               <RDF:Description>

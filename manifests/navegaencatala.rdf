@@ -16,7 +16,7 @@
                 <em:minVersion>19.0</em:minVersion>
                 <em:maxVersion>23.*</em:maxVersion>
                 <em:updateLink>ftp://ftp.softcatala.org/pub/softcatala/mozilla-extensions/navegaencatala/mozillaencatala-1.0.xpi</em:updateLink>
-                <em:updateHash>sha1:597d6958a343be2ceec167b999a80153376403f4</em:updateHash>
+                <em:updateHash>sha1:5f0156294ed52d4c1621de7b7c00e1cdf84ad578</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
